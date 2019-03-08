@@ -1,0 +1,58 @@
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+
+  /* margin-left: 3em; */
+   /* padding: 10%; */
+   width: 60%;
+   padding-bottom: 100%;
+   /* height: 30%; */
+   /* align-self: center; */
+}
+
+.grid > li {
+flex: 1 0 20%;
+  width: 8vw;
+height: 14vw;
+margin-right: 0.1em;
+margin-bottom: 0.1em;
+/* padding-top: 5%;
+  padding-bottom: 5%; */
+  justify-content: center;
+
+
+display: flex;
+
+font-size: 4em;
+
+}
+
+img {
+  width: 100%;
+  height: 100%;
+
+  display:none;
+}
+
+.front {
+  background-color: grey;
+}
+
+.back {
+  /* background: url("../img/kha.png") repeat 0 0; */
+  background-size: 100%; /*image won't display without this*/
+  background-color: grey;
+}
+
+
+.match {
+    background-size: 100%;
+    background-color: green;
+}
+
+.mismatch {
+  background-size: 100%;
+  background-color: red;
+}
