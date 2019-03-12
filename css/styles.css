@@ -1,5 +1,6 @@
 
 .grid {
+  order: 1;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
@@ -8,6 +9,7 @@
    /* padding: 10%; */
    width: 60%;
    padding-bottom: 100%;
+   padding-left: 0;
    /* height: 30%; */
    /* align-self: center; */
 }
@@ -55,4 +57,36 @@ img {
 .mismatch {
   background-size: 100%;
   background-color: red;
+
+}
+
+.allofthem {
+  display: flex;
+  /* flex-wrap: wrap; */
+  flex-direction: row;
+  justify-content: space-around;
+  align-content: center;
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-top: 5%;
+}
+
+.title {
+  text-align: center;
+  padding: 0 0 0 0;
+  font-size: 2em;
+}
+
+.game-info-panel {
+    order:2;
+  display: flex;
+  flex-direction: column;
+}
+
+p {
+  text-align: center;
+}
+
+.star {
+
 }
