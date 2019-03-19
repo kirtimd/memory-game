@@ -1,40 +1,50 @@
 
-let firstFlipped = false;
-let noOfMatchesYet = 0;
-let noOfMoves = 0;
+
+let cards = []; //will hold the list of cards
+let firstFlipped = false; //tracks if the first card has been flipped
+let noOfMatches = 0; //counter for no. of card matches
+let noOfMoves = 0; //counter for no. of moves
 let timer = {minutes:0, seconds:0};
-let cards = [];
 
+//array of images containing letters for the back of each card
+let symbols =['img/ka.png', 'img/kha.png', 'img/ga.png', 'img/gha.png',
+              'img/na.png', 'img/cha.png', 'img/chha.png', 'img/ja.png'];
 
-//array of urls to symbolIds
-let symbols =["img/ka.png", "img/kha.png",
-              "img/ga.png", "img/gha.png",
-              "img/na.png", "img/cha.png",
-              "img/chha.png", "img/ja.png"];
-
-let symbolIds = [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7];
-//each number appears twice since we need a pair
+let symbolIds = [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]; //unique identifier for each pair
+                                                   //represents the array index for symbols[]
+                                                   //will be randomized during initialization
 
 initialize();
-
+//add listeners to reset and play-again buttons
 document.getElementById('reset').addEventListener('click', initialize);
+document.getElementById('play-again').addEventListener('click', function() {
+    initialize();
+    //remove modal if player wants to play again
+    hideModal();
+});
 
-function initialize() { //also called during reset
-  console.log('init');
+//
+//The code below contains implementations for all functions
+//
+
+//Initialize the cards and the side panel
+function initialize() {
   noOfMoves = 0;
   document.getElementsByClassName('move-counter')[0].innerHTML = noOfMoves;
-  noOfMatchesYet = 0;
+  noOfMatches = 0;
   timer.minutes=0; timer.seconds=0;
-  setupListeners();
-  //randomize();
-  assignSymbolIds();
-}
-//simply swaps each element with one at a random index
-function randomize() {
-  for(let i = 0; i < 16; i++) {
-    let j = Math.floor(Math.random()*16);
 
-    //swap
+  randomize();
+  setupListeners();
+  console.log(symbolIds);
+
+}
+
+function randomize() { //simply swaps each element with another one at a random index
+  for(let i = 0; i < 16; i++) {
+    let j = Math.floor(Math.random()*16); //Random number between 0 and 15
+
+    //swap numbers
     let temp = symbolIds[i];
     symbolIds[i] = symbolIds[j];
     symbolIds[j] = temp;
@@ -42,55 +52,54 @@ function randomize() {
   }
 }
 
-
-
-function assignSymbolIds() {
-  for(let i=0; i <= 15; i++) {
-    cards[i].symbolId = symbolIds[i];
-  }
-}
-
 function setupListeners() {
-  for(let i=0; i <= 15; i++) {
+  for(let i = 0; i <= 15; i++) { //note: cannot use for-each here as we're
+                                 //pushing new items into the array
     const card = document.getElementById(i);
     card.className = 'front';
-    card.addEventListener('click', afterClick);
     cards.push({element: card,
-                symbolId: symbolIds[i%8],
-                symbol: symbols[symbolIds[i]]});
+                symbolId: symbolIds[i],
+                symbol: symbols[symbolIds[i]],
+                matched: false
+              });
   }
-
+  // add a single eventListener to the entire grid of 16 cards
+  //useCapture set to false. Event will be handled in the bubbling phase.
+  document.getElementById('grid').addEventListener('click', afterClick, false);
 }
 
-let firstCard;
 
-function afterClick() {
-  this.className = 'back';
+function afterClick(e) {
+  if(e===null) return; //if the click was not on a card, return
+  let card = e.target;
+  if(cards[card.id].matched) return; //if this card has already been matched, exit function
+  card.className = 'back';
   if(firstFlipped === false) {
-    firstCard = cards[this.id];
+    firstCard = cards[card.id];
     console.log("url('" + firstCard.symbol +"')");
     showSymbol(firstCard);
     firstFlipped = true;
   } else { //second card has been flipped
-    let secondCard = cards[this.id];
-    if(cardsMatch(firstCard, secondCard) === true) { //cards match
+    let secondCard = cards[card.id];
+    if(secondCard.matched === true) return;
+    if(firstCard.symbolId === secondCard.symbolId) { //cards match
       console.log('match');
       secondCard.element.className = 'match';
       showSymbol(secondCard);
       firstCard.element.className = 'match';
       showSymbol(firstCard);
 
-      //remove eventlisteners
-      secondCard.element.removeEventListener('click', afterClick);
-      firstCard.element.removeEventListener('click', afterClick);
+      firstCard.matched = true;
+      secondCard.matched = true;
 
+      cards[card.id].matched=true;
       firstCard = null;
-      noOfMatchesYet++;
+      noOfMatches++;
     } else { //mismatch
       showSymbol(secondCard);
-      this.className = 'mismatch';
+      card.className = 'mismatch';
       firstCard.element.className='mismatch';
-      let card1 = this; //pass this element to the function
+      let card1 = card; //pass the card to the function below
       setTimeout(function(){
         card1.className='front';
         firstCard.element.className='front';
@@ -100,34 +109,31 @@ function afterClick() {
     }
     firstFlipped = false;
 
-    //Now make changes to elements on side panel
-
-    //increment moves-counter
+    //Now, make changes to the elements on the side panel:
+    //1. increment moves-counter
     noOfMoves++;
     document.getElementsByClassName('move-counter')[0].innerHTML = noOfMoves;
-    if(noOfMatchesYet == 8) { //game over
-      document.getElementsByClassName('game-status')[0].innerHTML = "Success!";
-    }
 
+    //2. change star rating after the 10th move
     if(noOfMoves >= 10)
       setStarRating();
+
+    //if all 8 pairs matched, game is finished
+    if(noOfMatches === 8) {
+      setTimeout(showModal, 800); //show modal after 0.8sec
+
+    }
   }
 }
 
+//Show the card
 function showSymbol(card) {
-  card.element.style.backgroundImage
-      = "url('" + card.symbol +"')";
+  card.element.style.backgroundImage = "url('" + card.symbol +"')";
 }
 
-function cardsMatch(firstCard, secondCard) {
-  if(firstCard.symbolId === secondCard.symbolId)
-    return true;
-  return false;
-}
-
-
+//Timer
 let zeroBeforeMin, zeroBeforeSec;
-setInterval(function(){
+const timerFunc = setInterval(function(){
   if(timer.minutes < 10) zeroBeforeMin = "0";
   else zeroBeforeMin = "";
   if(timer.seconds < 10) zeroBeforeSec = "0";
@@ -139,18 +145,39 @@ setInterval(function(){
     timer.minutes++;
     timer.seconds=0;
   }
-}, 1000);
+}, 1000); //repeat function after every 1sec
 
 
+//Star rating
+//After the 10th move, star rating reduces(by half) after every 5 moves
 let starClassName = "star-rating-";
-let nextStar = 0;
+let nextStar = 0; //start at the right-most star
 function setStarRating() {
   if(nextStar <= 2)
-  if(noOfMoves%10==0){
+  if(noOfMoves%10==0){ // change to half star on the 10th, 20th, 30th,... move
     document.getElementById(starClassName+nextStar).innerHTML = "star_half";
   }
-  else if (noOfMoves%10==5) {
+  else if (noOfMoves%10==5) { // change to border star on 15th, 25th, 35th,... move
     document.getElementById(starClassName+nextStar).innerHTML = "star_border";
     nextStar++;
   }
+}
+
+//Show results are completing game
+function showModal() {
+  clearInterval(timerFunc);
+  console.log('here');
+  //hide grid
+  document.getElementById('grid').style.display = 'none';
+  //replace 'reset' button with 'play again'
+  document.getElementById('reset').style.display = 'none';
+  document.getElementById('play-again').style.display = 'block';
+
+}
+
+//Hide modal if player decides to play again
+function hideModal() {
+  document.getElementById('grid').style.display = 'flex';
+  document.getElementById('reset').style.display = 'block';
+  document.getElementById('play-again').style.display = 'none';
 }

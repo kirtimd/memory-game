@@ -1,33 +1,30 @@
 
-.grid {
+body {
+  font-family: 'Dosis', sans-serif;
+  text-align: center;
+}
+
+#grid {
   order: 1;
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
-
-  /* margin-left: 3em; */
-   /* padding: 10%; */
    width: 60%;
    padding-bottom: 100%;
    padding-left: 0;
-   /* height: 30%; */
-   /* align-self: center; */
 }
 
-.grid > li {
-flex: 1 0 20%;
+#grid > li {
+  flex: 1 0 20%;
   width: 8vw;
-height: 14vw;
-margin-right: 0.1em;
-margin-bottom: 0.1em;
-/* padding-top: 5%;
-  padding-bottom: 5%; */
+  height: 14vw;
+  margin-right: 0.1em;
+  margin-bottom: 0.1em;
+  border-radius: 0.1em;
   justify-content: center;
-
-
-display: flex;
-
-font-size: 4em;
+  background-repeat: no-repeat;
+  display: flex;
+  font-size: 4em;
 
 }
 
@@ -43,7 +40,6 @@ img {
 }
 
 .back {
-  /* background: url("../img/kha.png") repeat 0 0; */
   background-size: 100%; /*image won't display without this*/
   background-color: grey;
 }
@@ -62,7 +58,6 @@ img {
 
 .allofthem {
   display: flex;
-  /* flex-wrap: wrap; */
   flex-direction: row;
   justify-content: space-around;
   align-content: center;
@@ -72,21 +67,26 @@ img {
 }
 
 .title {
+  text-transform: uppercase;
+  color: orange;
   text-align: center;
   padding: 0 0 0 0;
-  font-size: 2em;
+  font-size: 4em;
+  line-height: 0.8em;
 }
 
 .game-info-panel {
-    order:2;
+  order:2; /*to align it on the right hand side*/
   display: flex;
   flex-direction: column;
 }
 
-p {
-  text-align: center;
-}
-
-.star {
-
+#play-again {
+  font-family: 'Dosis', sans-serif;
+  align-self: center;
+  font-size: 1.4em;
+  color: white;
+  display: none;
+  background-color: MediumVioletRed;
+  border-radius: 3px;
 }
