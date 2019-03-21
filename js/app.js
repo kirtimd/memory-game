@@ -5,6 +5,8 @@ let firstFlipped = false; //tracks if the first card has been flipped
 let noOfMatches = 0; //counter for no. of card matches
 let noOfMoves = 0; //counter for no. of moves
 let timer = {minutes:0, seconds:0};
+let nextStar = 0; //tracks which star we are currently on
+
 
 //array of images containing letters for the back of each card
 let symbols =['img/ka.png', 'img/kha.png', 'img/ga.png', 'img/gha.png',
@@ -29,11 +31,13 @@ document.getElementById('play-again').addEventListener('click', function() {
 
 //Initialize the cards and the side panel
 function initialize() {
+  cards = [];
   noOfMoves = 0;
   document.getElementsByClassName('move-counter')[0].innerHTML = noOfMoves;
   noOfMatches = 0;
+  firstFlipped = false;
   timer.minutes=0; timer.seconds=0;
-
+  resetStarRating();
   randomize();
   setupListeners();
   console.log(symbolIds);
@@ -54,12 +58,12 @@ function randomize() { //simply swaps each element with another one at a random 
 
 function setupListeners() {
   for(let i = 0; i <= 15; i++) { //note: cannot use for-each here as we're
-                                 //pushing new items into the array
+                                 //pushing new items(objects) into the array
     const card = document.getElementById(i);
     card.className = 'front';
     cards.push({element: card,
-                symbolId: symbolIds[i],
-                symbol: symbols[symbolIds[i]],
+                symbolId: symbolIds[i], 
+                symbol: symbols[symbolIds[i]], //Devnagari letter (image)
                 matched: false
               });
   }
@@ -72,15 +76,15 @@ function setupListeners() {
 function afterClick(e) {
   if(e===null) return; //if the click was not on a card, return
   let card = e.target;
-  if(cards[card.id].matched) return; //if this card has already been matched, exit function
+  if(cards[card.id].matched) return; //if this card has already been matched, return
   card.className = 'back';
   if(firstFlipped === false) {
     firstCard = cards[card.id];
-    console.log("url('" + firstCard.symbol +"')");
     showSymbol(firstCard);
     firstFlipped = true;
   } else { //second card has been flipped
     let secondCard = cards[card.id];
+    if(firstCard === secondCard) return; //if same card was clicked twice, return
     if(secondCard.matched === true) return;
     if(firstCard.symbolId === secondCard.symbolId) { //cards match
       console.log('match');
@@ -99,14 +103,16 @@ function afterClick(e) {
       showSymbol(secondCard);
       card.className = 'mismatch';
       firstCard.element.className='mismatch';
-      let card1 = card; //pass the card to the function below
-      setTimeout(function(){
+      let card1 = firstCard.element; //pass a copy of the cards to the function below
+      let card2 = card;
+      setTimeout(function(){ //flip cards after 0.8sec
         card1.className='front';
-        firstCard.element.className='front';
-        firstCard = null;
-      }, 800, card1, firstCard);
+        card2.className='front';
 
+      }, 800, card1, card2);
+      firstCard = null;
     }
+
     firstFlipped = false;
 
     //Now, make changes to the elements on the side panel:
@@ -115,12 +121,12 @@ function afterClick(e) {
     document.getElementsByClassName('move-counter')[0].innerHTML = noOfMoves;
 
     //2. change star rating after the 10th move
-    if(noOfMoves >= 10)
+    if(noOfMoves > 10)
       setStarRating();
 
     //if all 8 pairs matched, game is finished
     if(noOfMatches === 8) {
-      setTimeout(showModal, 800); //show modal after 0.8sec
+      setTimeout(showModal, 500); //show modal after 0.5sec
 
     }
   }
@@ -150,18 +156,28 @@ const timerFunc = setInterval(function(){
 
 //Star rating
 //After the 10th move, star rating reduces(by half) after every 5 moves
-let starClassName = "star-rating-";
-let nextStar = 0; //start at the right-most star
 function setStarRating() {
   if(nextStar <= 2)
   if(noOfMoves%10==0){ // change to half star on the 10th, 20th, 30th,... move
-    document.getElementById(starClassName+nextStar).innerHTML = "star_half";
+    document.getElementById("star-rating-"+nextStar).innerHTML = "star_half";
   }
   else if (noOfMoves%10==5) { // change to border star on 15th, 25th, 35th,... move
-    document.getElementById(starClassName+nextStar).innerHTML = "star_border";
+    document.getElementById("star-rating-"+nextStar).innerHTML = "star_border";
     nextStar++;
   }
 }
+
+//reset all the stars that have been set to half or star_border
+//and set nextStar to 0, so that we start at the right-most star for next game
+function resetStarRating() {
+  while(--nextStar >= 0) {
+    console.log("nextStar: "+nextStar);
+    document.getElementById("star-rating-"+nextStar).innerHTML = "star";
+  }
+  // document.getElementById(starClassName+"0").innerHTML = "star";
+  // document.getElementById(starClassName+"0").innerHTML = "star";
+}
+
 
 //Show results are completing game
 function showModal() {
